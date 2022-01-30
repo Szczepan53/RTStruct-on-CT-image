@@ -120,7 +120,7 @@ class Slice:
                 więc składowe 'z' punktów są dalej zbędne)."""
                 nodes2D = (contour[:, :2] - self.dcm.ImagePositionPatient[:2]) / self.dcm.PixelSpacing
                 newStructure.contours.append(nodes2D)
-        except KeyError:    # niektóre struktury nie zawierają żadnych konturów pasujących do slice'a self
+        except KeyError:  # niektóre struktury nie zawierają żadnych konturów pasujących do slice'a self
             pass
 
         if len(newStructure.contours) > 0:
@@ -167,9 +167,9 @@ class Slice:
         """
         # Wyciągnięcie pierwszej macierzy 2D konturu w celu zapobiegnięcia duplikacji wpisów w legendzie.
         first_contour, *contours = structure.contours
-        self.draw_contour(first_contour, structure.color, structure.name, lw) # Label ustawiany tylko raz na strukturę.
+        self.draw_contour(first_contour, structure.color, structure.name, lw)  # Label ustawiany tylko raz na strukturę.
         for contour in contours:
-            self.draw_contour(contour, structure.color, lw=lw) # W kolejnych konturach tej samej struktury nie ustawiamy labela.
+            self.draw_contour(contour, structure.color, lw=lw)  # W kolejnych konturach tej samej struktury nie ustawiamy labela.
 
     def draw_structures(self, lw: float = 0.9):
         """
@@ -218,16 +218,17 @@ def read_rtstruct(rt_structure_filename):
         for roiContour, roiStructureSet in zip(rt_structure.ROIContourSequence, rt_structure.StructureSetROISequence):
             structure = Structure()
             try:
-                structure.name = roiStructureSet.ROIName # Wyciągnięcie nazwy struktury (np. kości, płuco lewe itp.)
-                structure.color = roiContour.ROIDisplayColor # Wyciągnięcie preferowanego koloru konturów struktury
-                structure.number = roiContour.ReferencedROINumber # Wyciągnięcie numeru struktury w strukturze pliku RTStruct
+                structure.name = roiStructureSet.ROIName  # Wyciągnięcie nazwy struktury (np. kości, płuco lewe itp.)
+                structure.color = roiContour.ROIDisplayColor  # Wyciągnięcie preferowanego koloru konturów struktury
+                structure.number = roiContour.ReferencedROINumber  # Wyciągnięcie numeru struktury w strukturze pliku RTStruct
 
                 """Utworzenie słownika konturów indeksowanego po współrzędnej UID odniesienia
                  {UID odniesienia: [lista wektorów punktów konturu]}."""
 
                 structure.contours = {}
                 for seq in roiContour.ContourSequence:
-                    structure.contours.setdefault(seq.ContourImageSequence[0].ReferencedSOPInstanceUID, []).append(seq.ContourData)
+                    structure.contours.setdefault(seq.ContourImageSequence[0].ReferencedSOPInstanceUID, []).append(
+                        seq.ContourData)
                 structures.append(structure)
             except AttributeError:
                 # Obsługa przypadku, gdy w strukturze brakuje danych konturowych
