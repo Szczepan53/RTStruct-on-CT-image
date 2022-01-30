@@ -92,6 +92,7 @@ class Slice:
                 self.dcm.PixelData  # Jeśli załadowany DICOM nie ma atrybutu PixelData to nie zawiera danych obrazowych
             except AttributeError:
                 raise NotCTImageFileException("Passed DICOM file is not CT image data file")
+            self.UID = self.dcm.SOPInstanceUID
             self.z = self.dcm.ImagePositionPatient[2]
             self.structures = {}
             self.axes = plt  # Podpięcie pyplota do utworzonego obiektu - wykorzystywane przy testowaniu modułu.
@@ -109,23 +110,18 @@ class Slice:
         # Tworzymy nowy obiekt Structure, który będzie zawierał wyłącznie pasujące do slice'a self kontury
         newStructure = Structure(structure.name, np.divide(structure.color, 255), structure.number, [])
 
-        for contour_z in structure.contours:
-            """Sprawdzenie, czy kontur pasuje do slice'a self (porównanie składowej 'z' punktów konturu ze składową 'z'
-            orientacji pacjenta danego slice'a z uwzględnieniem grubości slice'ów)."""
-            if not np.isclose(contour_z, self.z, atol=self.dcm.SliceThickness / 2, rtol=0):
-                print(f"contour_z = {contour_z} don't match file {self.file_path} | z coord: {self.z}", file=sys.stderr)
-                continue
-            print(f"contour_z = {contour_z} MATCHES file {self.file_path} | z coord: {self.z}")
-
-            for contour in structure.contours[contour_z]:
-
+        try:
+            # wybranie tych konturów które mają jako UID odniesienia slice self
+            for contour in structure.contours[self.UID]:
                 # Przekształcenie wektora punktów konturu w macierz 3D
                 contour = np.array(contour).reshape(-1, 3)
-                """Przejście ze współrzędnych 'przestrzennych' na odpowiadające punktom piksele 
+                """Przejście ze współrzędnych 'przestrzennych' na odpowiadające punktom piksele
                 obrazu + opuszczenie składowej 'z' punktów konturu (sprawdziliśmy już, że dany kontur pasuje do slice'a
                 więc składowe 'z' punktów są dalej zbędne)."""
                 nodes2D = (contour[:, :2] - self.dcm.ImagePositionPatient[:2]) / self.dcm.PixelSpacing
                 newStructure.contours.append(nodes2D)
+        except KeyError:    # niektóre struktury nie zawierają żadnych konturów pasujących do slice'a self
+            pass
 
         if len(newStructure.contours) > 0:
             """Jeśli nowa struktura zawiera kontury to dodaj ją do słownika struktur
@@ -226,13 +222,12 @@ def read_rtstruct(rt_structure_filename):
                 structure.color = roiContour.ROIDisplayColor # Wyciągnięcie preferowanego koloru konturów struktury
                 structure.number = roiContour.ReferencedROINumber # Wyciągnięcie numeru struktury w strukturze pliku RTStruct
 
-                """Utworzenie słownika konturów indeksowanego po współrzędnej 'z' 
-                punktów konturu {współrzędna_z_konturu: [lista wektorów punktów konturu]}."""
-                structure.contours = {seq.ContourData[2]: [] for seq in roiContour.ContourSequence}
-                for seq in roiContour.ContourSequence:
-                    structure.contours[seq.ContourData[2]].append(seq.ContourData)
-                # structure.contours = {seq.ContourData[2]: seq.ContourData for seq in roiContour.ContourSequence}
+                """Utworzenie słownika konturów indeksowanego po współrzędnej UID odniesienia
+                 {UID odniesienia: [lista wektorów punktów konturu]}."""
 
+                structure.contours = {}
+                for seq in roiContour.ContourSequence:
+                    structure.contours.setdefault(seq.ContourImageSequence[0].ReferencedSOPInstanceUID, []).append(seq.ContourData)
                 structures.append(structure)
             except AttributeError:
                 # Obsługa przypadku, gdy w strukturze brakuje danych konturowych
