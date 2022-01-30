@@ -6,7 +6,7 @@ import glob
 import os
 from shapely.geometry import Polygon
 
-"""Moduł zajmujący się wczytywaniem, przetwarzaniem i kombinowaniem danych obrazowych z DICOM i danych konturowych RTStruct.
+"""Moduł zajmujący się wczytywaniem, przetwarzaniem, kombinowaniem i rysowanie, danych obrazowych z DICOM i danych konturowych RTStruct.
 
 Wymagane zewnętrzne biblioteki
 -----------------------------
