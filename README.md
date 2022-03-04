@@ -26,6 +26,6 @@ Moduł **gui.py** wykorzystuje klasy i funkcje zdefiniowane w module **utils.py*
 ![image](https://user-images.githubusercontent.com/62251572/156836252-45d01cce-16c5-44d5-b65d-40365700faae.png)
 ![image](https://user-images.githubusercontent.com/62251572/156836373-158c42bb-875e-4593-b2ba-b1223f83b021.png)
 ![image](https://user-images.githubusercontent.com/62251572/156836457-5ff79bd9-3cf5-4d44-ab48-7369cdef2760.png)
-![image](https://user-images.githubusercontent.com/62251572/156836768-0dff2d51-6b99-4909-94f5-fb52330e2412.png)
 ![image](https://user-images.githubusercontent.com/62251572/156835313-79f738b9-bc4e-4d98-a8ba-443a4d407713.png)
+![image](https://user-images.githubusercontent.com/62251572/156836768-0dff2d51-6b99-4909-94f5-fb52330e2412.png)
 ![image](https://user-images.githubusercontent.com/62251572/156835677-8d00ecf5-ebe3-494e-8527-65a556599f73.png)
